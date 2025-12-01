@@ -1,0 +1,26 @@
+# ---- .NET ----
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# ---- Node ----
+node_modules/
+.next/
+dist/
+npm-debug.log*
+
+# ---- Env / secrets ----
+.env
+.env.*
+*.local
+
+# ---- Observability data ----
+observability/data/
+prometheus-data/
+grafana-data/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
