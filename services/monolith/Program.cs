@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Sdmp.Monolith.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Observability standard: metrics, traces, structured JSON logs, health checks, correlation ids.
+builder.AddObservability();
 
 // OpenAPI / Swagger so every endpoint is documented and explorable.
 builder.Services.AddEndpointsApiExplorer();
@@ -21,10 +22,8 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "SDMP Monolith API v1"));
 
-// Minimal liveness endpoint; full health/readiness arrives with the observability task.
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
-   .WithName("Health")
-   .WithTags("Platform");
+// Wires correlation-id middleware, /metrics, /health, and /health/ready.
+app.UseObservability();
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
