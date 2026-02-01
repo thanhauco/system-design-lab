@@ -1,9 +1,11 @@
 using Sdmp.Monolith.Observability;
+using Sdmp.Monolith.Reliability;
 using Sdmp.Monolith.Domain;
 using Sdmp.Monolith.Infrastructure;
 using Sdmp.Monolith.Features.Users;
 using Sdmp.Monolith.Features.Products;
 using Sdmp.Monolith.Features.Orders;
+using Sdmp.Monolith.Features.Reliability;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,9 @@ builder.AddObservability();
 builder.Services.AddSingleton<IRepository<User>, InMemoryRepository<User>>();
 builder.Services.AddSingleton<IRepository<Product>, InMemoryRepository<Product>>();
 builder.Services.AddSingleton<IRepository<Order>, InMemoryRepository<Order>>();
+
+// Reliability standard: named resilience pipeline (timeout + retry + circuit breaker).
+builder.Services.AddResiliencePipelines();
 
 // OpenAPI / Swagger so every endpoint is documented and explorable.
 builder.Services.AddEndpointsApiExplorer();
@@ -35,10 +40,14 @@ app.UseSwaggerUI(o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "SDMP Monoli
 // Wires correlation-id middleware, /metrics, /health, and /health/ready.
 app.UseObservability();
 
+// Idempotency: makes mutating requests safe to retry via the Idempotency-Key header.
+app.UseMiddleware<IdempotencyMiddleware>();
+
 // Domain slices.
 app.MapUsers();
 app.MapProducts();
 app.MapOrders();
+app.MapReliabilityDemo();
 
 // Seed demo data for the in-memory stores.
 await SeedData.SeedAsync(
