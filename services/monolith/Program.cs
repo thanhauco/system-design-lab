@@ -12,10 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Observability standard: metrics, traces, structured JSON logs, health checks, correlation ids.
 builder.AddObservability();
 
-// Persistence: in-memory by default (zero external deps). Swap to Postgres by changing this line.
-builder.Services.AddSingleton<IRepository<User>, InMemoryRepository<User>>();
-builder.Services.AddSingleton<IRepository<Product>, InMemoryRepository<Product>>();
-builder.Services.AddSingleton<IRepository<Order>, InMemoryRepository<Order>>();
+// Persistence: in-memory by default; set Persistence:Provider=Postgres for the full platform.
+builder.AddPersistence();
 
 // Reliability standard: named resilience pipeline (timeout + retry + circuit breaker).
 builder.Services.AddResiliencePipelines();
@@ -49,10 +47,8 @@ app.MapProducts();
 app.MapOrders();
 app.MapReliabilityDemo();
 
-// Seed demo data for the in-memory stores.
-await SeedData.SeedAsync(
-    app.Services.GetRequiredService<IRepository<User>>(),
-    app.Services.GetRequiredService<IRepository<Product>>());
+// Seed demo data (and create the schema when using Postgres).
+await app.InitializePersistenceAsync();
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
