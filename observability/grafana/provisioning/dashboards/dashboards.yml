@@ -1,0 +1,13 @@
+apiVersion: 1
+
+# Auto-load dashboards from disk so the RED + reliability board appears on first boot.
+providers:
+  - name: sdmp
+    orgId: 1
+    folder: SDMP
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: false

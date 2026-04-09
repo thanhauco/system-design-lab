@@ -21,6 +21,13 @@ monolith ──OTLP──►  OTel Collector ──►  Jaeger
 - The monolith exports OpenTelemetry traces via OTLP to the collector, which forwards them to Jaeger.
 - Grafana is pre-provisioned with Prometheus and Jaeger data sources.
 
+## Pre-provisioned dashboard
+
+Grafana auto-loads the **SDMP Monolith — RED & Reliability** dashboard
+([json/sdmp-monolith.json](grafana/provisioning/dashboards/json/sdmp-monolith.json)) on first boot.
+It shows request rate, error rate, latency percentiles (p50/p95/p99), circuit-breaker state, and
+retry/order rates. Open Grafana → Dashboards → SDMP folder.
+
 ## Useful Prometheus queries
 
 ```promql
