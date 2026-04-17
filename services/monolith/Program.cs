@@ -53,3 +53,6 @@ await app.InitializePersistenceAsync();
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.Run();
+
+// Exposed so the integration test host (WebApplicationFactory) can boot the real app.
+public partial class Program { }
