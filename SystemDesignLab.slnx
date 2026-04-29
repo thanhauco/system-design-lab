@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/services/" />
+  <Folder Name="/services/monolith/">
+    <Project Path="services/monolith/Sdmp.Monolith.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sdmp.Monolith.Tests/Sdmp.Monolith.Tests.csproj" />
+  </Folder>
+</Solution>

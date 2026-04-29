@@ -95,6 +95,12 @@ cd services/monolith
 dotnet run
 ```
 
+Run the test suite (no Docker required — uses the in-memory provider):
+
+```bash
+dotnet test
+```
+
 ---
 
 ## Learning objectives
@@ -131,7 +137,10 @@ See [docs/standards](docs/standards/README.md) for the full specification.
 | Area | State |
 |------|-------|
 | Phase 1 Monolith (.NET 9) | ✅ Runnable — health, metrics, tracing, logs, reliability patterns |
+| Persistence | ✅ In-memory by default; Postgres via EF Core (config toggle) |
 | Local platform (Docker Compose) | ✅ Postgres, Redis, Prometheus, Grafana, Jaeger, OTel Collector |
+| Grafana dashboard | ✅ Pre-provisioned RED & reliability board |
+| Tests | ✅ 16 xUnit domain + integration tests (`dotnet test`) |
 | Concept curriculum | 🚧 Scaffolded, growing |
 | Phases 2–6 | 🗺️ Roadmapped |
 
