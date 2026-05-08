@@ -13,6 +13,17 @@ slides — they are implemented in the Phase 1 monolith and exercised by chaos l
 | Idempotency | `Reliability/IdempotencyMiddleware.cs` | Duplicate requests |
 | Graceful shutdown | host lifetime + SIGTERM drain | Rolling restart |
 
+### Idempotency store
+
+The idempotency guarantee is only as good as where the keys are stored. The middleware depends on an
+`IIdempotencyStore`:
+
+- **In-memory** (default) — fine for a single instance.
+- **Redis** — set `Idempotency:Provider=Redis`; keys (and replayed responses) are shared across every
+  instance, so a retry routed to a *different* pod still replays rather than re-executes. This is how
+  payment platforms guarantee a network retry never double-charges, regardless of which server
+  handles it.
+
 ## The three paths
 
 Every reliability concept demonstrates:

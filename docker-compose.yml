@@ -22,6 +22,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       Persistence__Provider: Postgres
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=sdmp;Username=sdmp;Password=sdmp"
+      Idempotency__Provider: Redis
+      ConnectionStrings__Redis: "redis:6379"
     depends_on:
       postgres:
         condition: service_healthy
