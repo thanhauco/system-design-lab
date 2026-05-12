@@ -18,6 +18,9 @@ builder.AddPersistence();
 // Reliability standard: named resilience pipeline (timeout + retry + circuit breaker).
 builder.Services.AddResiliencePipelines();
 
+// Idempotency store: in-memory by default; set Idempotency:Provider=Redis to share across instances.
+builder.AddIdempotency();
+
 // OpenAPI / Swagger so every endpoint is documented and explorable.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
