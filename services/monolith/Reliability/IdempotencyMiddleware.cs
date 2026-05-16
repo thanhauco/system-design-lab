@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 
 namespace Sdmp.Monolith.Reliability;
@@ -9,22 +8,25 @@ namespace Sdmp.Monolith.Reliability;
 /// performing the operation twice. This is the same mechanism payment APIs (e.g. Stripe) use so a
 /// network retry never double-charges a customer.
 ///
-/// Storage here is an in-memory cache with a TTL for simplicity. In a distributed deployment this
-/// moves to Redis so the guarantee holds across instances.
+/// Storage is provided by <see cref="IIdempotencyStore"/>: in-memory for a single instance, or Redis
+/// so the guarantee holds across a horizontally scaled fleet.
 /// </summary>
 public sealed class IdempotencyMiddleware
 {
     private const string HeaderName = "Idempotency-Key";
     private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(10);
 
-    private static readonly ConcurrentDictionary<string, CachedResponse> Cache = new();
-
     private readonly RequestDelegate _next;
+    private readonly IIdempotencyStore _store;
     private readonly ILogger<IdempotencyMiddleware> _logger;
 
-    public IdempotencyMiddleware(RequestDelegate next, ILogger<IdempotencyMiddleware> logger)
+    public IdempotencyMiddleware(
+        RequestDelegate next,
+        IIdempotencyStore store,
+        ILogger<IdempotencyMiddleware> logger)
     {
         _next = next;
+        _store = store;
         _logger = logger;
     }
 
@@ -42,14 +44,15 @@ public sealed class IdempotencyMiddleware
         }
 
         var key = keyValues.ToString();
+        var ct = context.RequestAborted;
 
-        if (Cache.TryGetValue(key, out var cached) && cached.ExpiresAt > DateTimeOffset.UtcNow)
+        if (await _store.TryGetAsync(key, ct) is { } cached)
         {
             _logger.LogInformation("Replaying idempotent response for key {Key}", key);
             context.Response.StatusCode = cached.StatusCode;
             context.Response.ContentType = cached.ContentType;
             context.Response.Headers["Idempotency-Replayed"] = "true";
-            await context.Response.Body.WriteAsync(cached.Body);
+            await context.Response.Body.WriteAsync(cached.Body, ct);
             return;
         }
 
@@ -66,15 +69,13 @@ public sealed class IdempotencyMiddleware
         // Only cache successful results; failures should be retryable.
         if (context.Response.StatusCode is >= 200 and < 300)
         {
-            Cache[key] = new CachedResponse(context.Response.StatusCode,
-                context.Response.ContentType ?? "application/json", bytes,
-                DateTimeOffset.UtcNow.Add(Ttl));
+            await _store.SaveAsync(key,
+                new IdempotentResponse(context.Response.StatusCode,
+                    context.Response.ContentType ?? "application/json", bytes),
+                Ttl, ct);
         }
 
         context.Response.Body = originalBody;
-        await context.Response.Body.WriteAsync(bytes);
+        await context.Response.Body.WriteAsync(bytes, ct);
     }
-
-    private readonly record struct CachedResponse(
-        int StatusCode, string ContentType, byte[] Body, DateTimeOffset ExpiresAt);
 }
