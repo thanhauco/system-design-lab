@@ -8,7 +8,7 @@ several of these; this folder is where standalone, focused examples live as the 
 | Retry + backoff | Reliability | `services/monolith/Reliability/ResiliencePipelines.cs` |
 | Circuit breaker | Reliability | `services/monolith/Reliability/ResiliencePipelines.cs` |
 | Idempotency | Reliability | `services/monolith/Reliability/IdempotencyMiddleware.cs` |
-| Outbox | Messaging | 🗺️ Phase 4 |
+| Outbox | Messaging | ✅ [outbox/](outbox/README.md) — `services/monolith/Messaging/` |
 | Saga | Architecture | 🗺️ Phase 4 |
 | CQRS | Architecture | 🗺️ Phase 4 |
 | Event Sourcing | Architecture | 🗺️ Phase 4 |
