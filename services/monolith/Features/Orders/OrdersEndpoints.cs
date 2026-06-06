@@ -35,6 +35,7 @@ public static class OrdersEndpoints
                 IRepository<User> users,
                 IRepository<Product> products,
                 IRepository<Order> orders,
+                Sdmp.Monolith.Messaging.IOutbox outbox,
                 ILogger<Program> logger,
                 CancellationToken ct) =>
             {
@@ -74,6 +75,17 @@ public static class OrdersEndpoints
 
                 var order = new Order(Guid.NewGuid(), req.UserId, resolvedLines, OrderStatus.Pending,
                     DateTimeOffset.UtcNow);
+
+                // Outbox pattern: stage the event before persisting the order. With the EF-backed
+                // outbox both rows commit in the same transaction, so the event can never be lost.
+                var payload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    orderId = order.Id,
+                    userId = order.UserId,
+                    total = order.Total
+                });
+                await outbox.EnqueueAsync("OrderCreated", payload, ct);
+
                 await orders.AddAsync(order, ct);
 
                 OrdersCreated.Add(1);

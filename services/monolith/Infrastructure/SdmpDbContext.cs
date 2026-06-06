@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sdmp.Monolith.Domain;
+using Sdmp.Monolith.Messaging;
 
 namespace Sdmp.Monolith.Infrastructure;
 
@@ -15,6 +16,7 @@ public sealed class SdmpDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OutboxMessage> Outbox => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -43,6 +45,15 @@ public sealed class SdmpDbContext : DbContext
             e.Property(o => o.Status).HasConversion<string>();
             // Persist the line collection as JSONB; it travels with the aggregate root.
             e.OwnsMany(o => o.Lines, nav => nav.ToJson());
+        });
+
+        b.Entity<OutboxMessage>(e =>
+        {
+            e.ToTable("outbox");
+            e.HasKey(m => m.Id);
+            e.Property(m => m.Type).IsRequired();
+            // Index the pending set so the processor's poll stays cheap as the table grows.
+            e.HasIndex(m => m.ProcessedAt);
         });
     }
 }
