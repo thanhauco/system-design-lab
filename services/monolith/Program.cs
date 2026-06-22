@@ -1,5 +1,6 @@
 using Sdmp.Monolith.Observability;
 using Sdmp.Monolith.Reliability;
+using Sdmp.Monolith.Messaging;
 using Sdmp.Monolith.Domain;
 using Sdmp.Monolith.Infrastructure;
 using Sdmp.Monolith.Features.Users;
@@ -20,6 +21,9 @@ builder.Services.AddResiliencePipelines();
 
 // Idempotency store: in-memory by default; set Idempotency:Provider=Redis to share across instances.
 builder.AddIdempotency();
+
+// Outbox: reliable event publishing. EF-backed (transactional) with Postgres, in-memory otherwise.
+builder.AddOutbox();
 
 // OpenAPI / Swagger so every endpoint is documented and explorable.
 builder.Services.AddEndpointsApiExplorer();
