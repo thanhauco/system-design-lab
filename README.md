@@ -140,7 +140,10 @@ See [docs/standards](docs/standards/README.md) for the full specification.
 | Persistence | ✅ In-memory by default; Postgres via EF Core (config toggle) |
 | Local platform (Docker Compose) | ✅ Postgres, Redis, Prometheus, Grafana, Jaeger, OTel Collector |
 | Grafana dashboard | ✅ Pre-provisioned RED & reliability board |
-| Tests | ✅ 16 xUnit domain + integration tests (`dotnet test`) |
+| Idempotency | ✅ In-memory or Redis store (config toggle) |
+| Outbox pattern | ✅ EF transactional + in-memory, background processor |
+| CI | ✅ GitHub Actions: build, test, compose validation |
+| Tests | ✅ 22 xUnit domain + integration tests (`dotnet test`) |
 | Concept curriculum | 🚧 Scaffolded, growing |
 | Phases 2–6 | 🗺️ Roadmapped |
 

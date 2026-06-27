@@ -45,6 +45,9 @@ sdmp_circuit_breaker_state
 
 # Retry volume
 rate(sdmp_retries_total[1m])
+
+# Outbox events published
+rate(sdmp_outbox_published_total[1m])
 ```
 
 See the concept guide in [docs/observability](../docs/observability/README.md).
